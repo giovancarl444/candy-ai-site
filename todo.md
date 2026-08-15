@@ -5,7 +5,7 @@
 - [x] Implement and validate a responsive file-library workflow.
 - [ ] Save the validated full-stack storage release as a managed checkpoint.
 - [ ] Sync the full-stack source, migration artifacts, and storage documentation to GitHub.
-- [ ] Validate the authenticated upload, open, and remove flow in a browser session.
+- [x] Validate the authenticated upload, open, and remove flow in a browser session.
 
 - [x] Confirm the current interactive release and supporting documentation are present on GitHub.
 - [x] Create and push a new annotated Git backup tag plus a mirrored recovery branch.

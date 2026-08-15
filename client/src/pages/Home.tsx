@@ -69,6 +69,13 @@ function ProfileDrawer({ character, saved, onClose, onSave, onChat }: { characte
 
 function bytesToReadable(size: number) { return size < 1024 ? `${size} B` : size < 1024 * 1024 ? `${Math.round(size / 1024)} KB` : `${(size / (1024 * 1024)).toFixed(1)} MB`; }
 
+function resolvedContentType(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const extensionType = extension === "txt" ? "text/plain" : extension === "pdf" ? "application/pdf" : extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "jpg" || extension === "jpeg" ? "image/jpeg" : "";
+  const acceptedMime = ["image/jpeg", "image/png", "image/webp", "application/pdf", "text/plain"];
+  return acceptedMime.includes(file.type) ? file.type : extensionType;
+}
+
 function FileLibrary({ open, onClose, isAuthenticated, loadingAuth, onSignIn, onActivity }: { open: boolean; onClose: () => void; isAuthenticated: boolean; loadingAuth: boolean; onSignIn: () => void; onActivity: (message: string) => void }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const utils = trpc.useUtils();
@@ -78,11 +85,12 @@ function FileLibrary({ open, onClose, isAuthenticated, loadingAuth, onSignIn, on
   const handleFile = async (file?: File) => {
     if (!file) return;
     const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf", "text/plain"];
-    if (!allowed.includes(file.type)) return onActivity("Choose a JPG, PNG, WEBP, PDF, or TXT file.");
+    const contentType = resolvedContentType(file);
+    if (!allowed.includes(contentType)) return onActivity("Choose a JPG, PNG, WEBP, PDF, or TXT file.");
     if (file.size > 8 * 1024 * 1024) return onActivity("Choose a file smaller than 8 MB.");
     const content = await file.arrayBuffer();
     const binary = new Uint8Array(content).reduce((result, byte) => result + String.fromCharCode(byte), "");
-    upload.mutate({ originalName: file.name, contentType: file.type, sizeBytes: file.size, base64Data: btoa(binary) });
+    upload.mutate({ originalName: file.name, contentType, sizeBytes: file.size, base64Data: btoa(binary) });
   };
   if (!open) return null;
   return <div className="file-library-layer" role="dialog" aria-modal="true" aria-label="My file library"><button className="profile-backdrop" onClick={onClose} aria-label="Close file library" /><aside className="file-library-panel"><div className="file-library-head"><div><p>YOUR PRIVATE LIBRARY</p><h2>My files</h2></div><button onClick={onClose} aria-label="Close file library"><X size={20} /></button></div>{loadingAuth ? <div className="library-loading"><LoaderCircle size={22} className="spin" />Checking access…</div> : !isAuthenticated ? <div className="library-auth"><FolderOpen size={32} /><h3>Save files to your private library</h3><p>Sign in to upload, view, and manage your own images and documents.</p><button onClick={onSignIn}>Sign in to continue</button></div> : <><div className="library-upload"><div><Paperclip size={18} /><span>JPG, PNG, WEBP, PDF or TXT · up to 8 MB</span></div><button onClick={() => fileInputRef.current?.click()} disabled={upload.isPending}>{upload.isPending ? <><LoaderCircle size={16} className="spin" />Uploading</> : <><Upload size={16} />Upload file</>}</button><input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,text/plain" onChange={event => { void handleFile(event.target.files?.[0]); event.currentTarget.value = ""; }} /></div><div className="library-list">{fileQuery.isLoading ? <div className="library-loading"><LoaderCircle size={22} className="spin" />Loading your files…</div> : fileQuery.data?.length ? fileQuery.data.map(file => <article className="library-file" key={file.id}><a href={file.storageUrl} target="_blank" rel="noreferrer" className="file-preview" aria-label={`Open ${file.originalName}`}>{file.contentType.startsWith("image/") ? <img src={file.storageUrl} alt="" /> : file.contentType === "application/pdf" ? <FileText size={23} /> : <FileImage size={23} />}</a><div className="file-info"><a href={file.storageUrl} target="_blank" rel="noreferrer">{file.originalName}</a><span>{bytesToReadable(file.sizeBytes)} · {new Date(file.createdAt).toLocaleDateString()}</span></div><button className="file-remove" onClick={() => remove.mutate({ id: file.id })} disabled={remove.isPending} aria-label={`Remove ${file.originalName}`}><Trash2 size={16} /></button></article>) : <div className="library-empty"><FolderOpen size={27} /><h3>Your library is ready</h3><p>Upload a visual, document, or note to keep it in one place.</p></div>}</div></>}</aside></div>;
