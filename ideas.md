@@ -31,3 +31,7 @@ The supplied discovery-interface reference is the ground truth for the implement
 ## Style Decisions
 
 The desktop application retains three catalogue columns at reference-like widths and moves to four only on unusually wide displays. The sidebar collapses behind a menu button below 980px, and cards reduce to two then one column without losing their portrait ratio or gradient overlay.
+
+## Interaction Extensions
+
+The next refinement adds local, reversible interactions that do not require a backend: banner and experience navigation, profile-detail drawers, visible saved states, contextual collection filtering, and lightweight activity confirmation. On mobile, a fixed bottom dock becomes the primary way to reach discovery, saved profiles, and account actions, while the off-canvas sidebar retains the complete navigation map.

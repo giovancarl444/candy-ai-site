@@ -1,5 +1,10 @@
 # Project Handoff Checklist
 
+- [x] Define the responsive behavior and interaction acceptance criteria for the next discovery-interface pass.
+- [x] Implement working promotion navigation, profile detail presentation, saved-profile states, and local filter interactions.
+- [x] Refine the mobile navigation and touch layout without diluting the desktop visual system.
+- [x] Validate desktop and mobile behavior, then checkpoint and push the completed enhancement set.
+
 - [x] Verify that the complete handoff documentation remains present on the remote `main` branch.
 - [x] Create and push a named Git safety tag for the approved design baseline.
 - [x] Verify the remote tag and record safe rollback guidance.
