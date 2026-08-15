@@ -4,7 +4,7 @@
 - [x] Review the upgraded storage APIs and define secure upload, list, and removal behavior.
 - [x] Implement and validate a responsive file-library workflow.
 - [x] Save the validated full-stack storage release as a managed checkpoint.
-- [ ] Sync the full-stack source, migration artifacts, and storage documentation to GitHub.
+- [x] Sync the full-stack source, migration artifacts, and storage documentation to GitHub.
 - [x] Validate the authenticated upload, open, and remove flow in a browser session.
 
 - [x] Confirm the current interactive release and supporting documentation are present on GitHub.
