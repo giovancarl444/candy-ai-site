@@ -5,7 +5,7 @@
 - [x] Implement a polished conversation route and connect profile actions into the chat flow.
 - [x] Refine and validate the expanded page set across desktop and mobile.
 - [x] Save the expanded page release as a managed checkpoint.
-- [ ] Sync the expanded source, route models, and validation notes to GitHub.
+- [x] Sync the expanded source, route models, and validation notes to GitHub.
 
 - [x] Upgrade the application to the managed full-stack foundation with file storage available.
 - [x] Review the upgraded storage APIs and define secure upload, list, and removal behavior.
