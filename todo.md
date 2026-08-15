@@ -4,7 +4,7 @@
 - [x] Implement detailed character profile and saved-collection routes with reliable navigation from the catalogue.
 - [x] Implement a polished conversation route and connect profile actions into the chat flow.
 - [x] Refine and validate the expanded page set across desktop and mobile.
-- [ ] Save the expanded page release as a managed checkpoint.
+- [x] Save the expanded page release as a managed checkpoint.
 - [ ] Sync the expanded source, route models, and validation notes to GitHub.
 
 - [x] Upgrade the application to the managed full-stack foundation with file storage available.
