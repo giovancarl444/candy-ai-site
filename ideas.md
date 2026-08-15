@@ -35,3 +35,7 @@ The desktop application retains three catalogue columns at reference-like widths
 ## Interaction Extensions
 
 The next refinement adds local, reversible interactions that do not require a backend: banner and experience navigation, profile-detail drawers, visible saved states, contextual collection filtering, and lightweight activity confirmation. On mobile, a fixed bottom dock becomes the primary way to reach discovery, saved profiles, and account actions, while the off-canvas sidebar retains the complete navigation map.
+
+## Route Expansion Map
+
+The next release preserves the same charcoal app shell, narrow icon-led sidebar, coral action color, rounded editorial media, and high-density card rhythm. The **character profile** route uses a full-width image composition with a restrained metadata rail, a tabbed editorial narrative, and clear routes into the conversation view. The **collection** route reuses the catalogue grid and its filter language while focusing on locally saved profiles and an intentional empty state. The **conversation** route replaces the generic chat component because its default dashboard styling and server-LLM contract would dilute the established visual language; it instead uses a bespoke, locally interactive composition that feels native to the rest of the product and is clearly presented as a demo interaction.

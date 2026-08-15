@@ -1,8 +1,10 @@
 /* Editorial Discovery Console: dark app shell, image-led catalogue, local-first interactions, and user-owned media. */
 import { useMemo, useRef, useState } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { routeProfiles } from "@/lib/routeProfiles";
 import {
   BadgeCheck, Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, CircleHelp, Compass, Crown, FileImage,
   FileText, FolderOpen, Globe2, HeartHandshake, House, Image, LoaderCircle, LockKeyhole, Menu,
@@ -54,17 +56,18 @@ const primaryNav = [
 ];
 
 function CharacterCard({ character, saved, onSave, onOpen }: { character: Character; saved: boolean; onSave: () => void; onOpen: () => void }) {
+  const isRoutable = routeProfiles.some(profile => profile.slug === character.name.toLowerCase());
   return <article className={`character-card ${saved ? "is-saved" : ""}`}>
     <img src={character.image} alt={`${character.name}, a featured profile`} loading="lazy" />
     <button className="card-hitbox" onClick={onOpen} aria-label={`View ${character.name}'s profile`} />
     <button className={`save-button ${saved ? "saved" : ""}`} onClick={onSave} aria-label={saved ? `Remove ${character.name} from saved` : `Save ${character.name}`}>{saved ? <BookmarkCheck size={16} fill="currentColor" /> : <Bookmark size={16} />}</button>
     {character.tag && <span className={`status-chip ${character.tag === "New" ? "fresh" : ""}`}>{character.tag === "Series" ? <Play size={9} fill="currentColor" /> : <Sparkles size={10} />} {character.tag}</span>}
-    <div className="card-copy"><button className="profile-open" onClick={onOpen}><h3 className="card-title">{character.name} <span className="card-age">{character.age}</span></h3></button><p className="card-description">{character.description}</p>{character.play && <button className="play-chip" onClick={onOpen}><Play size={10} fill="currentColor" /> Play</button>}</div>
+    <div className="card-copy">{isRoutable ? <a className="profile-open" href={`/profiles/${character.name.toLowerCase()}`}><h3 className="card-title">{character.name} <span className="card-age">{character.age}</span></h3></a> : <button className="profile-open" onClick={onOpen}><h3 className="card-title">{character.name} <span className="card-age">{character.age}</span></h3></button>}<p className="card-description">{character.description}</p>{character.play && <button className="play-chip" onClick={onOpen}><Play size={10} fill="currentColor" /> Play</button>}</div>
   </article>;
 }
 
-function ProfileDrawer({ character, saved, onClose, onSave, onChat }: { character: Character; saved: boolean; onClose: () => void; onSave: () => void; onChat: () => void }) {
-  return <div className="profile-layer" role="dialog" aria-modal="true" aria-label={`${character.name} profile`}><button className="profile-backdrop" onClick={onClose} aria-label="Close profile" /><aside className="profile-drawer"><div className="profile-visual"><img src={character.image} alt="" /><div className="profile-visual-shade" /><button className="drawer-close" onClick={onClose} aria-label="Close profile"><X size={20} /></button>{character.tag && <span className="status-chip drawer-tag">{character.tag === "Series" ? <Play size={9} fill="currentColor" /> : <Sparkles size={10} />} {character.tag}</span>}</div><div className="drawer-content"><p className="drawer-eyebrow">CHARACTER SPOTLIGHT</p><h2>{character.name} <span>{character.age}</span></h2><p className="drawer-description">{character.description} This profile is ready for a light, conversational discovery flow.</p><div className="drawer-meta"><span><Sparkles size={14} /> {character.category}</span><span><Globe2 size={14} /> Available now</span></div><div className="drawer-actions"><button className="drawer-secondary" onClick={onSave}>{saved ? <BookmarkCheck size={17} fill="currentColor" /> : <Bookmark size={17} />}{saved ? "Saved" : "Save profile"}</button><button className="drawer-primary" onClick={onChat}><MessageCircle size={17} />Start chat</button></div></div></aside></div>;
+function ProfileDrawer({ character, saved, chatEnabled, onClose, onSave, onChat }: { character: Character; saved: boolean; chatEnabled: boolean; onClose: () => void; onSave: () => void; onChat: () => void }) {
+  return <div className="profile-layer" role="dialog" aria-modal="true" aria-label={`${character.name} profile`}><button className="profile-backdrop" onClick={onClose} aria-label="Close profile" /><aside className="profile-drawer"><div className="profile-visual"><img src={character.image} alt="" /><div className="profile-visual-shade" /><button className="drawer-close" onClick={onClose} aria-label="Close profile"><X size={20} /></button>{character.tag && <span className="status-chip drawer-tag">{character.tag === "Series" ? <Play size={9} fill="currentColor" /> : <Sparkles size={10} />} {character.tag}</span>}</div><div className="drawer-content"><p className="drawer-eyebrow">CHARACTER SPOTLIGHT</p><h2>{character.name} <span>{character.age}</span></h2><p className="drawer-description">{character.description} This profile is ready for a light, conversational discovery flow.</p><div className="drawer-meta"><span><Sparkles size={14} /> {character.category}</span><span><Globe2 size={14} /> Available now</span></div><div className="drawer-actions"><button className="drawer-secondary" onClick={onSave}>{saved ? <BookmarkCheck size={17} fill="currentColor" /> : <Bookmark size={17} />}{saved ? "Saved" : "Save profile"}</button><button className="drawer-primary" onClick={onChat}><MessageCircle size={17} />{chatEnabled ? "Start chat" : "Chat coming soon"}</button></div></div></aside></div>;
 }
 
 function bytesToReadable(size: number) { return size < 1024 ? `${size} B` : size < 1024 * 1024 ? `${Math.round(size / 1024)} KB` : `${(size / (1024 * 1024)).toFixed(1)} MB`; }
@@ -97,6 +100,7 @@ function FileLibrary({ open, onClose, isAuthenticated, loadingAuth, onSignIn, on
 }
 
 export default function Home() {
+  const [, setLocation] = useLocation();
   const { loading: loadingAuth, isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("Discover");
@@ -117,7 +121,7 @@ export default function Home() {
   const moveExperiences = (direction: number) => setExperienceStart(current => (current + direction + experiences.length) % experiences.length);
   const goToCatalogue = (filter = "All") => { setActiveFilter(filter); document.getElementById("catalogue")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
   const openLibrary = () => { setSidebarOpen(false); setLibraryOpen(true); };
-  const selectNav = (label: string) => { setActiveSection(label); setSidebarOpen(false); if (label === "Collection") goToCatalogue("Saved"); if (label === "Discover" || label === "Home") goToCatalogue("All"); if (label === "Chat") showActivity("Choose a profile to begin a conversation."); };
+  const selectNav = (label: string) => { setActiveSection(label); setSidebarOpen(false); if (label === "Collection") return setLocation("/collection"); if (label === "Chat") return setLocation("/chat/eira"); if (label === "Discover" || label === "Home") goToCatalogue("All"); };
   const banner = banners[activeBanner];
   const filters = ["All", "Spotlight", "New", "Stories", "Saved"];
 
@@ -128,7 +132,7 @@ export default function Home() {
       <section className="section catalogue-heading" id="catalogue"><div className="catalogue-title-row"><h2 className="section-heading"><span className="accent">Discover</span> Characters</h2><button className="saved-summary" onClick={() => goToCatalogue("Saved")}><BookmarkCheck size={15} />{savedProfiles.length} saved</button></div><div className="filter-row"><label className="search-wrap"><Search size={16} /><input className="search-input" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search profiles" aria-label="Search profiles" /></label>{filters.map(filter => <button key={filter} className={`filter-chip ${activeFilter === filter ? "active" : ""}`} onClick={() => setActiveFilter(filter)}>{filter === "Saved" && <Bookmark size={13} />}{filter}</button>)}</div>{visibleCharacters.length > 0 ? <div className="character-grid">{visibleCharacters.map(character => <CharacterCard key={`${character.name}-${character.age}`} character={character} saved={savedProfiles.includes(character.name)} onSave={() => toggleSaved(character.name)} onOpen={() => setSelectedCharacter(character)} />)}</div> : <div className="empty-state"><Bookmark size={26} /><h3>No saved profiles yet</h3><p>Save a profile from the catalogue to build a personal collection.</p><button onClick={() => setActiveFilter("All")}>Browse all characters</button></div>}</section></div></main>
     <nav className="mobile-dock" aria-label="Mobile navigation"><button className={activeSection === "Home" || activeSection === "Discover" ? "active" : ""} onClick={() => { setActiveSection("Discover"); goToCatalogue("All"); }}><Compass size={19} /><span>Discover</span></button><button onClick={() => { setActiveSection("Collection"); goToCatalogue("Saved"); }}><BookmarkCheck size={19} /><span>Saved</span>{savedProfiles.length > 0 && <b>{savedProfiles.length}</b>}</button><button onClick={openLibrary}><FolderOpen size={20} /><span>Files</span></button><button onClick={() => setSidebarOpen(true)}><Menu size={20} /><span>Menu</span></button></nav>
     {showCookies && <aside className="cookie-card" aria-label="Cookie preferences"><div className="cookie-top"><h2 className="cookie-title">We use cookies</h2><Globe2 className="cookie-icon" size={22} /></div><p className="cookie-copy">To deliver and improve our services, analyze usage, and personalize your experience. <button onClick={() => showActivity("Cookie preference details are ready for a policy page.")}>Read more</button></p><button className="cookie-customize" onClick={() => showActivity("Cookie customization is ready for a connected settings page.")}><Sparkles size={14} /> Customize</button><div className="cookie-actions"><button className="reject" onClick={() => setShowCookies(false)}>Reject</button><button className="accept" onClick={() => setShowCookies(false)}>Accept</button></div></aside>}
-    {selectedCharacter && <ProfileDrawer character={selectedCharacter} saved={savedProfiles.includes(selectedCharacter.name)} onClose={() => setSelectedCharacter(null)} onSave={() => toggleSaved(selectedCharacter.name)} onChat={() => { showActivity(`Conversation with ${selectedCharacter.name} is ready to connect.`); setSelectedCharacter(null); }} />}
+    {selectedCharacter && <ProfileDrawer character={selectedCharacter} saved={savedProfiles.includes(selectedCharacter.name)} chatEnabled={routeProfiles.some(profile => profile.slug === selectedCharacter.name.toLowerCase())} onClose={() => setSelectedCharacter(null)} onSave={() => toggleSaved(selectedCharacter.name)} onChat={() => { const slug = selectedCharacter.name.toLowerCase(); if (routeProfiles.some(profile => profile.slug === slug)) setLocation(`/chat/${slug}`); else showActivity(`A conversation with ${selectedCharacter.name} is coming soon.`); setSelectedCharacter(null); }} />}
     <FileLibrary open={libraryOpen} onClose={() => setLibraryOpen(false)} isAuthenticated={isAuthenticated} loadingAuth={loadingAuth} onSignIn={startLogin} onActivity={showActivity} />
     {activity && <div className="activity-toast" role="status"><Sparkles size={15} />{activity}<button onClick={() => setActivity("")} aria-label="Dismiss message"><X size={15} /></button></div>}
   </div>;
