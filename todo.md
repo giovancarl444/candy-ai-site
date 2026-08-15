@@ -1,8 +1,8 @@
 # Project Handoff Checklist
 
 - [x] Confirm the current interactive release and supporting documentation are present on GitHub.
-- [ ] Create and push a new annotated Git backup tag plus a mirrored recovery branch.
-- [ ] Verify the new remote backup references and record the release safety status.
+- [x] Create and push a new annotated Git backup tag plus a mirrored recovery branch.
+- [x] Verify the new remote backup references and record the release safety status.
 
 - [x] Define the responsive behavior and interaction acceptance criteria for the next discovery-interface pass.
 - [x] Implement working promotion navigation, profile detail presentation, saved-profile states, and local filter interactions.
