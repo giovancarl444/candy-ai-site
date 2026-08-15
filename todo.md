@@ -3,7 +3,7 @@
 - [x] Upgrade the application to the managed full-stack foundation with file storage available.
 - [x] Review the upgraded storage APIs and define secure upload, list, and removal behavior.
 - [x] Implement and validate a responsive file-library workflow.
-- [ ] Save the validated full-stack storage release as a managed checkpoint.
+- [x] Save the validated full-stack storage release as a managed checkpoint.
 - [ ] Sync the full-stack source, migration artifacts, and storage documentation to GitHub.
 - [x] Validate the authenticated upload, open, and remove flow in a browser session.
 
